@@ -2,6 +2,7 @@ package rars.venus.settings.editor.views;
 
 import org.jetbrains.annotations.NotNull;
 import rars.venus.settings.editor.ColorPickerButton;
+import rars.venus.util.GridBagBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,60 +26,32 @@ public final class BaseStyleView extends JPanel {
         super(new GridBagLayout());
 
         final var theme = EDITOR_THEME_SETTINGS.getCurrentTheme();
+        final var builder = new GridBagBuilder(this)
+            .withInsets(new Insets(5, 5, 5, 5));
 
         // Create labels and buttons for each row
         final var fgLabel = new JLabel(FOREGROUND);
         this.foregroundColorButton = new ColorPickerButton(theme.foregroundColor);
+        builder.addLabelAndField(0, fgLabel, this.foregroundColorButton);
 
         final var bgLabel = new JLabel(BACKGROUND);
         this.backgroundColorButton = new ColorPickerButton(theme.backgroundColor);
+        builder.addLabelAndField(1, bgLabel, this.backgroundColorButton);
 
         final var lhLabel = new JLabel(LINE_HIGHLIGHT);
         this.lineHighlightColorButton = new ColorPickerButton(theme.lineHighlightColor);
+        builder.addLabelAndField(2, lhLabel, this.lineHighlightColorButton);
 
         final var tsLabel = new JLabel(TEXT_SELECTION);
         this.textSelectionColorButton = new ColorPickerButton(theme.selectionColor);
+        builder.addLabelAndField(3, tsLabel, this.textSelectionColorButton);
 
         final var caretLabel = new JLabel(CARET);
         this.caretColorButton = new ColorPickerButton(theme.caretColor);
+        builder.addLabelAndField(4, caretLabel, this.caretColorButton);
 
-        // Layout as a two-column grid: label | button
-        final var gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.NONE;
-
-        int row = 0;
-        addRow(this, gbc, row++, fgLabel, this.foregroundColorButton);
-        addRow(this, gbc, row++, bgLabel, this.backgroundColorButton);
-        addRow(this, gbc, row++, lhLabel, this.lineHighlightColorButton);
-        addRow(this, gbc, row++, tsLabel, this.textSelectionColorButton);
-        addRow(this, gbc, row, caretLabel, this.caretColorButton);
-
-        // Add a vertical glue/filler to push content to top if the panel grows
-        gbc.gridx = 0;
-        gbc.gridy = row + 1;
-        gbc.gridwidth = 3;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.VERTICAL;
-        this.add(Box.createVerticalGlue(), gbc);
+        // Add a filler to push content to the top if the panel grows
+        builder.addFiller(5, 2);
     }
 
-    private static void addRow(final JPanel panel, final GridBagConstraints gbc, final int r,
-                               final JComponent label, final JComponent control) {
-        // Label
-        gbc.gridx = 0;
-        gbc.gridy = r;
-        gbc.weightx = 0.0;
-        gbc.weighty = 0.0;
-        gbc.fill = GridBagConstraints.NONE;
-        panel.add(label, gbc);
-
-        // Control
-        gbc.gridx = 1;
-        gbc.gridy = r;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(control, gbc);
-    }
 }

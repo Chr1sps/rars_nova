@@ -3,6 +3,7 @@ package rars.venus.settings.editor.views;
 import org.jetbrains.annotations.NotNull;
 import rars.util.FontUtilities;
 import rars.util.FontWeight;
+import rars.venus.util.GridBagBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,28 +21,18 @@ public final class FontSettingsView extends JPanel {
     public final @NotNull JCheckBox ligaturesCheckbox;
 
     public FontSettingsView() {
-        super();
-        this.setLayout(new GridBagLayout());
-        final var gbc = new GridBagConstraints();
-
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        super(new GridBagLayout());
+        final var builder = new GridBagBuilder(this)
+            .withInsets(new Insets(5, 5, 5, 5));
 
         // font family
-        gbc.gridy = 0;
-        gbc.gridx = 0;
-        this.add(FONT_LABEL, gbc);
         final var fontFamilies = FontUtilities.allFontFamilies;
         this.fontSelector = new JComboBox<>(fontFamilies);
         this.fontSelector.setEditable(false);
         this.fontSelector.setMaximumRowCount(20);
-        gbc.gridx = 1;
-        this.add(fontSelector, gbc);
+        builder.addLabelAndField(0, FONT_LABEL, this.fontSelector);
 
         // font size
-        gbc.gridy = 1;
-        gbc.gridx = 0;
-        this.add(SIZE_LABEL, gbc);
         final var fontSizeModel = new SpinnerNumberModel(
             12,
             1,
@@ -50,26 +41,20 @@ public final class FontSettingsView extends JPanel {
         );
         this.fontSizeSpinner = new JSpinner(fontSizeModel);
         this.fontSizeSpinner.setToolTipText("Current font size in points.");
-        gbc.gridx = 1;
-        this.add(fontSizeSpinner, gbc);
+        builder.addLabelAndField(1, SIZE_LABEL, this.fontSizeSpinner);
 
         // font weight
-        gbc.gridy = 2;
-        gbc.gridx = 0;
-        this.add(WEIGHT_LABEL, gbc);
         this.fontWeightSelector = new JComboBox<>(FontWeight.values());
         this.fontWeightSelector.setEditable(false);
         this.fontWeightSelector.setMaximumRowCount(FontWeight.values().length);
-        gbc.gridx = 1;
-        this.add(fontWeightSelector, gbc);
+        builder.addLabelAndField(2, WEIGHT_LABEL, this.fontWeightSelector);
 
         // ligatures
-        gbc.gridy = 3;
-        gbc.gridx = 0;
-        this.add(LIGATURES_LABEL, gbc);
         this.ligaturesCheckbox = new JCheckBox();
         this.ligaturesCheckbox.setToolTipText("Enable or disable ligatures.");
-        gbc.gridx = 1;
-        this.add(ligaturesCheckbox, gbc);
+        builder.addLabelAndField(3, LIGATURES_LABEL, this.ligaturesCheckbox);
+
+        // filler to push content to top
+        builder.addFiller(4, 2);
     }
 }
