@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import rars.ErrorList;
 import rars.Globals;
-import rars.simulator.Simulator;
+import rars.util.ListenerDispatcher;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
 
+import static java.util.Objects.requireNonNull;
 import static rars.Globals.FONT_SETTINGS;
 
 /*
@@ -380,6 +381,7 @@ public final class MessagesPane extends JTabbedPane {
         private final @NotNull NavigationFilter navigationFilter;
         private final @NotNull Consumer<Void> stopListener;
         private int initialPos;
+        private @Nullable ListenerDispatcher.Handle<Void> handle;
 
         public Asker(final int maxLen) {
             this.maxLen = maxLen;
@@ -451,6 +453,7 @@ public final class MessagesPane extends JTabbedPane {
             };
             stopListener = s -> Asker.this.returnResponse();
             resultQueue = new ArrayBlockingQueue<>(1);
+            handle = null;
         }
 
         private void run() { // must be invoked from the GUI thread
@@ -461,8 +464,7 @@ public final class MessagesPane extends JTabbedPane {
             this.initialPos = MessagesPane.this.runTextArea.getCaretPosition();
             MessagesPane.this.runTextArea.setNavigationFilter(this.navigationFilter);
             MessagesPane.this.runTextArea.getDocument().addDocumentListener(this.listener);
-            final Simulator self = Globals.SIMULATOR;
-            self.stopEventHook.subscribe(this.stopListener);
+            this.handle = Globals.SIMULATOR.stopEventHook.subscribe(this.stopListener);
         }
 
         private void cleanup() { // not required to be called from the GUI thread
@@ -473,8 +475,8 @@ public final class MessagesPane extends JTabbedPane {
                     MessagesPane.this.runTextArea.setNavigationFilter(null);
                     MessagesPane.this.runTextArea.setCaretPosition(MessagesPane.this.runTextArea.getDocument()
                         .getLength());
-                    final Simulator self = Globals.SIMULATOR;
-                    self.stopEventHook.unsubscribe(this.stopListener);
+                    Globals.SIMULATOR.stopEventHook.unsubscribe(requireNonNull(this.handle));
+                    this.handle = null;
                 });
         }
 
@@ -502,5 +504,5 @@ public final class MessagesPane extends JTabbedPane {
                 this.cleanup();
             }
         }
-    } // Asker class
+    }
 }

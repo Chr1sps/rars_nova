@@ -1,11 +1,14 @@
 package rars.venus.run;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
+import rars.util.ListenerDispatcher;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
@@ -16,6 +19,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.function.Consumer;
 
+import static java.util.Objects.requireNonNull;
 import static rars.Globals.BOOL_SETTINGS;
 
 /*
@@ -51,10 +55,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public final class RunGoAction extends GuiAction {
 
-    public static final int defaultMaxSteps = -1; // "forever", formerly 10000000; // 10 million
+    public static final int defaultMaxSteps = -1; // "forever"
     public static int maxSteps = RunGoAction.defaultMaxSteps;
     private String name;
     private ExecutePane executePane;
+    private @Nullable ListenerDispatcher.Handle<@NotNull SimulatorNotice> listenerHandle;
 
     public RunGoAction(
         final String name, final Icon icon, final String descrip,
@@ -80,6 +85,9 @@ public final class RunGoAction extends GuiAction {
     public void actionPerformed(final ActionEvent e) {
         this.name = this.getValue(Action.NAME).toString();
         this.executePane = this.mainUI.mainPane.executePane;
+        this.executePane.registerValues.clearHighlighting();
+        this.executePane.fpRegValues.clearHighlighting();
+        this.executePane.csrValues.clearHighlighting();
         if (FileStatus.isAssembled()) {
             if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny(); // DPS 17-July-2008
@@ -98,25 +106,23 @@ public final class RunGoAction extends GuiAction {
                 this.mainUI.setMenuState(FileStatus.State.RUNNING);
 
                 // Setup cleanup procedures for the simulation
-                final var onSimulatorStopListener = new Consumer<SimulatorNotice>() {
-                    @Override
-                    public void accept(final SimulatorNotice notice) {
-                        if (notice.action() != SimulatorNotice.Action.STOP) {
-                            return;
-                        }
-                        final Simulator.Reason reason = notice.reason();
-                        if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
-                            EventQueue.invokeLater(() -> RunGoAction.this.paused(
-                                notice.done(), reason,
-                                notice.exception()
-                            ));
-                        } else {
-                            EventQueue.invokeLater(() -> RunGoAction.this.stopped(notice.exception(), reason));
-                        }
-                        Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
+                final Consumer<SimulatorNotice> onSimulatorStopListener = notice -> {
+                    if (notice.action() != SimulatorNotice.Action.STOP) {
+                        return;
                     }
+                    final Simulator.Reason reason = notice.reason();
+                    if (reason == Simulator.Reason.PAUSE || reason == Simulator.Reason.BREAKPOINT) {
+                        EventQueue.invokeLater(() -> this.paused(
+                            notice.done(), reason,
+                            notice.exception()
+                        ));
+                    } else {
+                        EventQueue.invokeLater(() -> this.stopped(notice.exception(), reason));
+                    }
+                    Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(requireNonNull(this.listenerHandle));
+                    this.listenerHandle = null;
                 };
-                Globals.SIMULATOR.simulatorNoticeHook.subscribe(onSimulatorStopListener);
+                this.listenerHandle = Globals.SIMULATOR.simulatorNoticeHook.subscribe(onSimulatorStopListener);
 
                 final int[] breakPoints = this.executePane.textSegment.getSortedBreakPointsArray();
                 Globals.SIMULATOR.startSimulation(
@@ -131,16 +137,7 @@ public final class RunGoAction extends GuiAction {
                 JOptionPane.showMessageDialog(
                     this.mainUI,
                     "reset " + this.mainUI.isMemoryReset + " started " + this.mainUI.isExecutionStarted
-                );// "You
-                // must
-                // reset
-                // before
-                // you
-                // can
-                // execute
-                // the
-                // program
-                // again.");
+                );
             }
         } else {
             // note: this should never occur since "Go" is only enabled after successful

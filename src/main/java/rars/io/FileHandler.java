@@ -8,7 +8,7 @@ import rars.settings.BoolSettings;
 import java.io.*;
 import java.nio.channels.FileChannel;
 
-public final class FileHandler {
+/*internal*/ final class FileHandler {
     private static final int SYSCALL_MAXFILES = 32;
 
     private static final int STDIN = 0;

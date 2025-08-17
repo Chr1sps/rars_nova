@@ -13,6 +13,7 @@ import rars.riscv.hardware.MemoryConfiguration;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.util.ConversionUtils;
+import rars.util.ListenerDispatcher;
 import rars.venus.run.RunSpeedPanel;
 import rars.venus.util.RepeatButton;
 
@@ -28,8 +29,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Date;
-import java.util.function.Consumer;
+import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static rars.Globals.*;
 import static rars.util.Utils.deriveFontFromStyle;
 
@@ -129,14 +131,7 @@ public final class DataSegmentWindow extends JInternalFrame {
     private int[] displayBaseAddresses;
     private int defaultBaseAddressIndex;
     private JButton[] baseAddressButtons;
-    public final @NotNull Consumer<@NotNull MemoryAccessNotice> processMemoryAccessNotice = notice -> {
-        if (notice.accessType == AccessNotice.AccessType.WRITE) {
-            // Uses the same highlighting technique as for Text Segment -- see
-            // AddressCellRenderer class in DataSegmentWindow.java.
-            final var address = notice.address;
-            this.highlightCellForAddress(address);
-        }
-    };
+    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> listenerHandle;
 
     /**
      * Constructor for the Data Segment window.
@@ -169,12 +164,14 @@ public final class DataSegmentWindow extends JInternalFrame {
                 // timed
                 // or stepped mode.
                 if (s.runSpeed() != RunSpeedPanel.UNLIMITED_SPEED || s.maxSteps() == 1) {
-                    Globals.MEMORY_INSTANCE.subscribe(this.processMemoryAccessNotice);
+                    this.listenerHandle = Globals.MEMORY_INSTANCE.subscribe(this::processMemoryAccessNotice);
                     this.addressHighlighting = true;
                 }
             } else {
                 // Simulated MIPS execution stops. Stop responding.
-                Globals.MEMORY_INSTANCE.deleteSubscriber(this.processMemoryAccessNotice);
+                if (this.listenerHandle != null) {
+                    Globals.MEMORY_INSTANCE.deleteSubscriber(this.listenerHandle);
+                }
             }
         });
 
@@ -244,6 +241,15 @@ public final class DataSegmentWindow extends JInternalFrame {
         features.add(asciiDisplayCheckBox);
 
         this.contentPane.add(features, BorderLayout.SOUTH);
+    }
+
+    public void processMemoryAccessNotice(final @NotNull MemoryAccessNotice notice) {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            // Uses the same highlighting technique as for Text Segment -- see
+            // AddressCellRenderer class in DataSegmentWindow.java.
+            final var address = notice.address;
+            this.highlightCellForAddress(address);
+        }
     }
 
     // Create and fill String array containing labels for base address combo box.

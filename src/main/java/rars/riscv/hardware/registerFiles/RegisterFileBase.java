@@ -6,7 +6,9 @@ import rars.exceptions.SimulationException;
 import rars.notices.RegisterAccessNotice;
 import rars.riscv.hardware.registers.Register;
 import rars.util.BinaryUtils;
+import rars.util.ListenerDispatcher;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public abstract class RegisterFileBase {
@@ -139,13 +141,19 @@ public abstract class RegisterFileBase {
         }
     }
 
-    public void addRegistersListener(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
+    public @NotNull ListenerDispatcher.Handle<@NotNull RegisterAccessNotice> addRegistersListener(
+        final @NotNull Consumer<? super RegisterAccessNotice> listener
+    ) {
+        final var handles = new ArrayList<ListenerDispatcher.Handle<RegisterAccessNotice>>(registers.length);
         for (final var register : this.registers) {
-            register.registerChangeHook.subscribe(listener);
+            final var handle = register.registerChangeHook.subscribe(listener);
+            handles.add(handle);
         }
+
+        return ListenerDispatcher.Handle.compound(handles);   
     }
 
-    public void deleteRegistersListener(final @NotNull Consumer<? super RegisterAccessNotice> listener) {
+    public void deleteRegistersListener(final @NotNull ListenerDispatcher.Handle<? super RegisterAccessNotice> listener) {
         for (final var register : this.registers) {
             register.registerChangeHook.unsubscribe(listener);
         }

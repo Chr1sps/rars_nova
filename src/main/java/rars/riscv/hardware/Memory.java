@@ -1023,12 +1023,13 @@ public final class Memory {
     /**
      * Method to accept registration from observer for any memory address.
      */
-    public void subscribe(final @NotNull Consumer<? super MemoryAccessNotice> listener) {
-        try { // split so start address always >= end address
-            this.subscribe(listener, 0, 0x7ffffffc);
-            this.subscribe(listener, 0x80000000, 0xfffffffc);
+    public @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> subscribe(
+        final @NotNull Consumer<? super MemoryAccessNotice> listener
+    ) {
+        try {
+            return this.subscribe(listener, 0, 0xfffffffc);
         } catch (final AddressErrorException aee) {
-            Memory.LOGGER.error("Internal error in Memory.addObserver.", aee);
+            throw new RuntimeException("Internal error in Memory#addObserver.", aee);
         }
     }
 
@@ -1041,23 +1042,21 @@ public final class Memory {
      *     the observer
      * @param addr
      *     the memory address which must be on word boundary
+     * @return
      * @throws AddressErrorException
      *     if any.
      */
-    public void subscribe(
+    public @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> subscribe(
         final @NotNull Consumer<? super MemoryAccessNotice> obs,
         final int addr
     ) throws AddressErrorException {
-        this.subscribe(obs, addr, addr);
+        return this.subscribe(obs, addr, addr);
     }
 
     /**
      * Method to accept registration from observer for specific address range. The
      * last byte included in the address range is the last byte of the word
-     * specified
-     * by the ending address. Note to observers: this class delegates Observable
-     * operations
-     * so notices will come from the delegate, not the memory object.
+     * specified by the ending address.
      *
      * @param listener
      *     the observer
@@ -1067,39 +1066,33 @@ public final class Memory {
      * @param endAddr
      *     the high end of memory address range, must be on word
      *     boundary
+     * @return
      * @throws AddressErrorException
      *     if any.
      */
-    public void subscribe(
+    public @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> subscribe(
         final @NotNull Consumer<? super MemoryAccessNotice> listener,
         final int startAddr,
         final int endAddr
     ) throws AddressErrorException {
         MemoryUtils.checkLoadWordAligned(startAddr);
         MemoryUtils.checkLoadWordAligned(endAddr);
-        // upper half of address space (above 0x7fffffff) has sign bit 1 thus is seen as
-        // negative.
-        if (startAddr >= 0 && endAddr < 0) {
-            throw new AddressErrorException(
-                "range cannot cross 0x8000000; please split it up",
-                ExceptionReason.LOAD_ACCESS_FAULT,
-                startAddr
-            );
-        }
-        if (endAddr < startAddr) {
+        if (Integer.compareUnsigned(startAddr, endAddr) > 0) {
             throw new AddressErrorException(
                 "end address of range < start address of range ",
                 ExceptionReason.LOAD_ACCESS_FAULT,
                 startAddr
             );
         }
-        this.observables.add(new MemoryObservable(listener, startAddr, endAddr));
+        final var observable = new MemoryObservable(listener, startAddr, endAddr);
+        this.observables.add(observable);
+        return observable.handle;
     }
 
     /**
      * Remove specified memory observers
      */
-    public void deleteSubscriber(final @NotNull Consumer<? super MemoryAccessNotice> listener) {
+    public void deleteSubscriber(final @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> listener) {
         for (final var observable : this.observables) {
             observable.hook.unsubscribe(listener);
         }
@@ -1385,6 +1378,7 @@ public final class Memory {
         public final @NotNull ListenerDispatcher<@NotNull MemoryAccessNotice>.Hook hook;
         private final int lowAddress;
         private final int highAddress;
+        final @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> handle;
 
         public MemoryObservable(
             final @NotNull Consumer<? super MemoryAccessNotice> listener,
@@ -1395,11 +1389,12 @@ public final class Memory {
             this.highAddress = endAddr;
             this.dispatcher = new ListenerDispatcher<>();
             this.hook = this.dispatcher.getHook();
-            this.hook.subscribe(listener);
+            this.handle = this.hook.subscribe(listener);
         }
 
         public boolean match(final int address) {
-            return (address >= this.lowAddress && address <= this.highAddress - 1 + DataTypes.WORD_SIZE);
+            return Integer.compareUnsigned(address, this.lowAddress) >= 0 &&
+                Integer.compareUnsigned(address, this.highAddress - 1 + DataTypes.WORD_SIZE) <= 0;
         }
 
         /**

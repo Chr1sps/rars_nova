@@ -3,6 +3,7 @@ package rars.util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.assembler.DataTypes;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
@@ -11,9 +12,9 @@ import rars.riscv.hardware.Memory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.Consumer;
 
-// TODO: move this class to the common SystemIO class
+import static java.util.Objects.requireNonNull;
+
 
 public final class BitmapDisplay extends JFrame {
 
@@ -23,7 +24,7 @@ public final class BitmapDisplay extends JFrame {
     public final int displayHeight;
     private final @NotNull Grid grid;
     private final @NotNull GraphicsPanel panel;
-    private final @NotNull Consumer<@NotNull MemoryAccessNotice> accessNoticeCallback;
+    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> listenerHandle;
     private final @NotNull Memory memory;
     public int baseAddress;
     private int upperAddressBound;
@@ -51,26 +52,29 @@ public final class BitmapDisplay extends JFrame {
         this.fillGrid();
         this.pack();
 
-        this.accessNoticeCallback = notice -> {
-            if (notice.accessType == AccessNotice.AccessType.WRITE) {
-                this.updateDisplay(notice.address, notice.length);
-            }
-        };
-
         try {
-            this.memory.subscribe(this.accessNoticeCallback, baseAddress, upperAddressBound);
+            this.listenerHandle = this.memory.subscribe(
+                this::onMemoryAccess, baseAddress, upperAddressBound
+            );
         } catch (final AddressErrorException e) {
             throw new RuntimeException(e);
         }
     }
+    
+    private void onMemoryAccess(final @NotNull MemoryAccessNotice notice) {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            this.updateDisplay(notice.address, notice.length);
+        }
+    }
 
     public void changeBaseAddress(final int newBaseAddress) {
-        this.memory.deleteSubscriber(this.accessNoticeCallback);
+        this.memory.deleteSubscriber(requireNonNull(this.listenerHandle));
+        this.listenerHandle = null;
         this.baseAddress = newBaseAddress;
         this.upperAddressBound = newBaseAddress + (this.displayWidth * this.displayHeight * DataTypes.WORD_SIZE);
         try {
-            this.memory.subscribe(
-                this.accessNoticeCallback,
+            this.listenerHandle = this.memory.subscribe(
+                this::onMemoryAccess,
                 this.baseAddress,
                 this.upperAddressBound
             );
@@ -80,7 +84,8 @@ public final class BitmapDisplay extends JFrame {
     }
 
     public void unsubscribeFromMemory() {
-        this.memory.deleteSubscriber(this.accessNoticeCallback);
+        this.memory.deleteSubscriber(requireNonNull(this.listenerHandle));
+        this.listenerHandle = null;
     }
 
     private void fillGrid() {

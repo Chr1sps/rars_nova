@@ -5,7 +5,10 @@ import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
+import rars.notices.MemoryAccessNotice;
+import rars.notices.RegisterAccessNotice;
 import rars.riscv.hardware.registers.Register;
+import rars.util.ListenerDispatcher;
 import rars.venus.VenusUI;
 
 import javax.swing.*;
@@ -14,7 +17,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -71,7 +73,8 @@ public abstract class AbstractTool extends JFrame {
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private final int lowMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().dataSegmentBaseAddress;
     private final int highMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().stackBaseAddress;
-    private final @NotNull Consumer<@NotNull AccessNotice> callback = this::processAccessNotice;
+    private @Nullable ListenerDispatcher.Handle<@NotNull RegisterAccessNotice> registerListenerHandle;
+    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> memoryListenerHandle;
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;
     protected JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.
@@ -99,6 +102,7 @@ public abstract class AbstractTool extends JFrame {
         this.title = title;
         this.heading = heading;
         this.mainUI = mainUI;
+        this.registerListenerHandle = null;
     }
 
     // METHODS WITH DEFAULT IMPLEMENTATIONS
@@ -340,7 +344,7 @@ public abstract class AbstractTool extends JFrame {
      */
     protected void addAsObserver(final Register reg) {
         if (reg != null) {
-            reg.registerChangeHook.subscribe(callback);
+            this.registerListenerHandle = reg.registerChangeHook.subscribe(this::processAccessNotice);
         }
     }
 
@@ -355,7 +359,10 @@ public abstract class AbstractTool extends JFrame {
      * app terminates (e.g. when the button is re-enabled).
      */
     protected void deleteAsSubscriber() {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(callback);
+        if (this.memoryListenerHandle == null) {
+            Globals.MEMORY_INSTANCE.deleteSubscriber(memoryListenerHandle);
+            this.memoryListenerHandle = null;
+        }
     }
 
     /**
@@ -365,8 +372,9 @@ public abstract class AbstractTool extends JFrame {
      *     a {@link Register} object
      */
     protected void deleteAsSubscriber(final Register reg) {
-        if (reg != null) {
-            reg.registerChangeHook.unsubscribe(callback);
+        if (reg != null && this.registerListenerHandle != null) {
+            reg.registerChangeHook.unsubscribe(this.registerListenerHandle);
+            this.registerListenerHandle = null;
         }
     }
 

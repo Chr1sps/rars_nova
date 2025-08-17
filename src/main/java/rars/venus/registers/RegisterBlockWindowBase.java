@@ -1,6 +1,7 @@
 package rars.venus.registers;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.notices.AccessNotice;
 import rars.notices.RegisterAccessNotice;
@@ -9,6 +10,7 @@ import rars.riscv.hardware.registerFiles.RegisterFileBase;
 import rars.riscv.hardware.registers.Register;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
+import rars.util.ListenerDispatcher;
 import rars.venus.NumberDisplayBaseChooser;
 import rars.venus.VenusUI;
 import rars.venus.run.RunSpeedPanel;
@@ -20,8 +22,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.function.Consumer;
+import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static rars.Globals.*;
 
 /*
@@ -64,12 +67,13 @@ public abstract class RegisterBlockWindowBase extends JPanel {
     private static final int NUMBER_SIZE = 45;
     private static final int NAME_SIZE = 80;
     private static final int VALUE_SIZE = 160;
-    public final @NotNull Consumer<@NotNull RegisterAccessNotice> processRegisterNotice;
+    private @Nullable ListenerDispatcher.Handle<@NotNull RegisterAccessNotice> listenerHandle;
     private final @NotNull JTable table;
     private final @NotNull RegisterFileBase registerFile;
     @NotNull
     private final VenusUI mainUI;
     private int highlightRow;
+    private boolean doHighlighting;
 
     /**
      * Constructor which sets up a fresh window with a table that contains the
@@ -96,6 +100,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
                 // or stepped mode.
                 if (Double.compare(notice.runSpeed(), RunSpeedPanel.UNLIMITED_SPEED) != 0 || notice.maxSteps() == 1) {
                     beginObserving();
+                    this.doHighlighting = true;
                 }
             } else {
                 // Simulated MIPS execution stops.  Stop responding.
@@ -103,6 +108,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             }
         });
         this.highlightRow = -1;
+        this.doHighlighting = false;
         this.table = new MyTippedJTable(
             new RegTableModel(this.setupWindow()), registerDescriptions,
             new String[]{
@@ -141,25 +147,28 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         ));
-        processRegisterNotice = notice -> {
-
-            if (notice.accessType == AccessNotice.AccessType.WRITE) {
-                // Uses the same highlighting technique as for Text Segment -- see
-                // AddressCellRenderer class in DataSegmentWindow.java.
-                this.highlightCellForRegister(notice.register);
-                this.mainUI.registersPane.setSelectedComponent(this);
-            }
-        };
     }
 
     protected abstract @NotNull String formatRegisterValue(final long value, int base);
 
     private void beginObserving() {
-        this.registerFile.addRegistersListener(this.processRegisterNotice);
+        this.listenerHandle = this.registerFile.addRegistersListener(this::processRegisterNotice);
     }
 
     private void endObserving() {
-        this.registerFile.deleteRegistersListener(this.processRegisterNotice);
+        if (this.listenerHandle != null) {
+            this.registerFile.deleteRegistersListener(this.listenerHandle);
+            this.listenerHandle = null;
+        }
+    }
+    
+    public void processRegisterNotice(final @NotNull RegisterAccessNotice notice) {
+        if (notice.accessType == AccessNotice.AccessType.WRITE) {
+            // Uses the same highlighting technique as for Text Segment -- see
+            // AddressCellRenderer class in DataSegmentWindow.java.
+            this.highlightCellForRegister(notice.register);
+            this.mainUI.registersPane.setSelectedComponent(this);
+        }
     }
 
     private void resetRegisters() {
@@ -202,6 +211,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
      * Clear highlight background color from any row currently highlighted.
      */
     public void clearHighlighting() {
+        this.doHighlighting = false;
         this.table.tableChanged(new TableModelEvent(this.table.getModel()));
         this.highlightRow = -1;
     }
@@ -276,7 +286,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
             );
             cell.setFont(this.font);
             cell.setHorizontalAlignment(this.alignment);
-            if (BOOL_SETTINGS.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && row == highlightRow) {
+            if (BOOL_SETTINGS.getSetting(BoolSetting.REGISTERS_HIGHLIGHTING) && doHighlighting && row == highlightRow) {
                 final var highlightingStyle = Globals.HIGHLIGHTING_SETTINGS.getRegisterHighlightingStyle();
                 cell.setForeground(highlightingStyle.foreground());
                 cell.setBackground(highlightingStyle.background());

@@ -1,4 +1,4 @@
-package rars.riscv.syscalls;
+package rars.io;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +8,6 @@ import rars.simulator.Simulator;
 import rars.util.BitmapDisplay;
 
 public final class BitmapDisplayManager {
-    // public static @NotNull DisplayBitmapImpl INSTANCE = new DisplayBitmapImpl(Globals.MEMORY_INSTANCE);
     private final @NotNull Memory memory;
     private @Nullable BitmapDisplay display;
 

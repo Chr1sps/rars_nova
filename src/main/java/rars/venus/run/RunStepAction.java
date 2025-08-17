@@ -1,12 +1,13 @@
 package rars.venus.run;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rars.Globals;
 import rars.exceptions.SimulationException;
 import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
 import rars.simulator.ProgramArgumentList;
 import rars.simulator.Simulator;
+import rars.util.ListenerDispatcher;
 import rars.venus.ExecutePane;
 import rars.venus.FileStatus;
 import rars.venus.GuiAction;
@@ -15,8 +16,8 @@ import rars.venus.VenusUI;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.function.Consumer;
 
+import static java.util.Objects.*;
 import static rars.Globals.BOOL_SETTINGS;
 
 /*
@@ -54,12 +55,14 @@ public final class RunStepAction extends GuiAction {
 
     private String name;
     private ExecutePane executePane;
+    private @Nullable ListenerDispatcher.Handle<SimulatorNotice> listenerHandle;
 
     public RunStepAction(
         final String name, final Icon icon, final String descrip,
         final Integer mnemonic, final KeyStroke accel, final VenusUI gui
     ) {
         super(name, icon, descrip, mnemonic, accel, gui);
+        this.listenerHandle = null;
     }
 
     /**
@@ -72,7 +75,7 @@ public final class RunStepAction extends GuiAction {
         this.name = this.getValue(Action.NAME).toString();
         this.executePane = this.mainUI.mainPane.executePane;
         if (FileStatus.isAssembled()) {
-            if (!this.mainUI.isExecutionStarted) { // DPS 17-July-2008
+            if (!this.mainUI.isExecutionStarted) {
                 this.processProgramArgumentsIfAny();
             }
             this.mainUI.isExecutionStarted = true;
@@ -80,21 +83,20 @@ public final class RunStepAction extends GuiAction {
             this.executePane.textSegment.setCodeHighlighting(true);
 
             // Setup callback for after step finishes
-            final var stopListener = new Consumer<@NotNull SimulatorNotice>() {
-                @Override
-                public void accept(final @NotNull SimulatorNotice item) {
-                    if (item.action() != SimulatorNotice.Action.STOP) {
-                        return;
-                    }
-                    EventQueue.invokeLater(() -> RunStepAction.this.stepped(
-                        item.done(), item.reason(),
-                        item.exception()
-                    ));
-
-                    Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(this);
+            this.listenerHandle = Globals.SIMULATOR.simulatorNoticeHook.subscribe(item -> {
+                if (item.action() != SimulatorNotice.Action.STOP) {
+                    return;
                 }
-            };
-            Globals.SIMULATOR.simulatorNoticeHook.subscribe(stopListener);
+                EventQueue.invokeLater(() -> RunStepAction.this.stepped(
+                    item.done(), item.reason(),
+                    item.exception()
+                ));
+
+                Globals.SIMULATOR.simulatorNoticeHook.unsubscribe(
+                    requireNonNull(RunStepAction.this.listenerHandle)
+                );
+                this.listenerHandle = null;
+            });
 
             Globals.SIMULATOR.startSimulation(Globals.REGISTER_FILE.getProgramCounter(), 1, new int[0], this.mainUI);
         } else {
@@ -104,19 +106,10 @@ public final class RunStepAction extends GuiAction {
         }
     }
 
-    // When step is completed, control returns here (from execution thread,
-    // indirectly)
-    // to update the GUI.
-
     /**
-     * <p>stepped.</p>
-     *
-     * @param done
-     *     a boolean
-     * @param reason
-     *     a {@link Simulator.Reason} object
-     * @param pe
-     *     a {@link SimulationException} object
+     * When step is completed, control returns here (from execution thread,
+     * indirectly)
+     * to update the GUI.
      */
     public void stepped(final boolean done, final Simulator.Reason reason, final SimulationException pe) {
         this.executePane.registerValues.updateRegisters();
@@ -164,13 +157,14 @@ public final class RunStepAction extends GuiAction {
         this.mainUI.isMemoryReset = false;
     }
 
-    // Method to store any program arguments into MIPS memory and registers before
-    // execution begins. Arguments go into the gap between $sp and kernel memory.
-    // Argument pointers and count go into runtime stack and $sp is adjusted
-    //////////////////////////////////////////////////////////////////////////////////// accordingly.
-    // $a0 gets argument count (argc), $a1 gets stack address of first arg pointer
-
-    /// ///////////////////////////////////////////////////////////////////////////////// (argv).
+    /**
+     * Method to store any program arguments into MIPS memory and registers before
+     * execution begins. Arguments go into the gap between $sp and kernel memory.
+     * Argument pointers and count go into runtime stack and $sp is adjusted
+     * accordingly.
+     * $a0 gets argument count (argc), $a1 gets stack address of first arg pointer
+     * (argv).
+     */
     private void processProgramArgumentsIfAny() {
         final String programArguments = this.executePane.textSegment.getProgramArguments();
         if (programArguments == null || programArguments.isEmpty() ||

@@ -3,7 +3,6 @@ package rars.io;
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
 import rars.riscv.hardware.Memory;
-import rars.riscv.syscalls.BitmapDisplayManager;
 import rars.settings.BoolSetting;
 import rars.settings.BoolSettings;
 import rars.simulator.Simulator;

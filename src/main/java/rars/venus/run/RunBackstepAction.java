@@ -70,39 +70,21 @@ public final class RunBackstepAction extends GuiAction {
         executePane.textSegment.setCodeHighlighting(true);
 
         if (OtherSettings.getBackSteppingEnabled()) {
-            Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment.processMemoryAccessNotice);
-            Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues.processRegisterNotice);
-            Globals.CS_REGISTER_FILE.addRegistersListener(executePane.csrValues.processRegisterNotice);
-            Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues.processRegisterNotice);
+            final var memoryHandle = Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment::processMemoryAccessNotice);
+            final var registersHandle = Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues::processRegisterNotice);
+            final var csrHandle = Globals.CS_REGISTER_FILE.addRegistersListener(executePane.csrValues::processRegisterNotice);
+            final var fpHandle = Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues::processRegisterNotice);
             Globals.program.getBackStepper().backStep();
-            Globals.MEMORY_INSTANCE.deleteSubscriber(executePane.dataSegment.processMemoryAccessNotice);
-            Globals.REGISTER_FILE.deleteRegistersListener(executePane.registerValues.processRegisterNotice);
+            Globals.MEMORY_INSTANCE.deleteSubscriber(memoryHandle);
+            Globals.REGISTER_FILE.deleteRegistersListener(registersHandle);
+            Globals.CS_REGISTER_FILE.deleteRegistersListener(csrHandle);
+            Globals.FP_REGISTER_FILE.deleteRegistersListener(fpHandle);
             executePane.registerValues.updateRegisters();
             executePane.fpRegValues.updateRegisters();
             executePane.csrValues.updateRegisters();
             executePane.dataSegment.updateValues();
-            executePane.textSegment.highlightStepAtPC(); // Argument aded 25 June 2007
+            executePane.textSegment.highlightStepAtPC();
             FileStatus.setSystemState(FileStatus.State.RUNNABLE);
-            // if we've backed all the way, disable the button
-            // if (Globals.program.getBackStepper().empty()) {
-            // ((AbstractAction)((AbstractButton)e.getSource()).getAction()).setEnabled(false);
-            // }
-            /*
-             * if (pe !=null) {
-             * RunGoAction.resetMaxSteps();
-             * mainUI.getMessagesPane().postMessage(
-             * pe.errors().generateErrorReport());
-             * mainUI.getMessagesPane().postMessage(
-             * "\n"+name+": execution terminated with errors.\n\n");
-             * mainUI.getRegistersPane().setSelectedComponent(executePane.
-             * getControlAndStatusWindow());
-             * FileStatus.set(FileStatus.TERMINATED); // should be redundant.
-             * executePane.getTextSegmentWindow().setCodeHighlighting(true);
-             * executePane.getTextSegmentWindow().unhighlightAllSteps();
-             * executePane.getTextSegmentWindow().highlightStepAtAddress(RegisterFile.
-             * getProgramCounter()-4);
-             * }
-             */
             this.mainUI.isMemoryReset = false;
         }
     }

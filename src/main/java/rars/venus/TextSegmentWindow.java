@@ -14,6 +14,7 @@ import rars.notices.SimulatorNotice;
 import rars.settings.BoolSetting;
 import rars.util.BinaryUtils;
 import rars.util.FontUtilities;
+import rars.util.ListenerDispatcher;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -27,9 +28,9 @@ import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
-import java.util.Objects;
 import java.util.function.Consumer;
 
+import static java.util.Objects.requireNonNull;
 import static rars.Globals.*;
 import static rars.util.Utils.deriveFontFromStyle;
 
@@ -104,6 +105,7 @@ public final class TextSegmentWindow extends JInternalFrame {
             this.updateTable(notice.address, notice.value);
         }
     };
+    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> listenerHandle;
     private boolean codeHighlighting;
     private boolean breakpointsEnabled; // Added 31 Dec 2009
     private int highlightAddress;
@@ -637,12 +639,13 @@ public final class TextSegmentWindow extends JInternalFrame {
     private void addAsTextSegmentObserver() {
         final var memoryConfiguration = Globals.MEMORY_INSTANCE.getMemoryConfiguration();
         try {
-            Globals.MEMORY_INSTANCE.subscribe(
+            this.listenerHandle = Globals.MEMORY_INSTANCE.subscribe(
                 this.processMemoryAccessNotice,
                 memoryConfiguration.textBaseAddress,
                 memoryConfiguration.dataSegmentBaseAddress
             );
-        } catch (final AddressErrorException ignored) {
+        } catch (final AddressErrorException e) {
+            throw new RuntimeException("Internal error when linking the text segment window to memory.", e);
         }
     }
 
@@ -713,7 +716,7 @@ public final class TextSegmentWindow extends JInternalFrame {
         // for that. So we'll pretend to be Memory observable and send it a fake memory
         // write update.
         try {
-            this.executePane.dataSegment.processMemoryAccessNotice.accept(new MemoryAccessNotice(
+            this.executePane.dataSegment.processMemoryAccessNotice(new MemoryAccessNotice(
                 AccessNotice.AccessType.WRITE,
                 address, DataTypes.WORD_SIZE,
                 value
@@ -729,7 +732,10 @@ public final class TextSegmentWindow extends JInternalFrame {
      * Little convenience method to remove this as observer of text segment
      */
     private void deleteAsTextSegmentObserver() {
-        Globals.MEMORY_INSTANCE.deleteSubscriber(this.processMemoryAccessNotice);
+        if (this.listenerHandle != null) {
+            Globals.MEMORY_INSTANCE.deleteSubscriber(this.listenerHandle);
+            this.listenerHandle = null;
+        }
     }
 
     /**
@@ -811,7 +817,7 @@ public final class TextSegmentWindow extends JInternalFrame {
 
         @Override
         public String getColumnName(final int col) {
-            return Objects.requireNonNull(ColumnData.fromInt(col)).name;
+            return requireNonNull(ColumnData.fromInt(col)).name;
         }
 
         @Override
@@ -1085,7 +1091,7 @@ public final class TextSegmentWindow extends JInternalFrame {
                 final Point p = e.getPoint();
                 final int index = this.columnModel.getColumnIndexAtX(p.x);
                 final int realIndex = this.columnModel.getColumn(index).getModelIndex();
-                return Objects.requireNonNull(ColumnData.fromInt(realIndex)).description;
+                return requireNonNull(ColumnData.fromInt(realIndex)).description;
             }
 
             /// When user clicks on beakpoint column header, breakpoints are
