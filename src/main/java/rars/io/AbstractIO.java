@@ -1,6 +1,8 @@
 package rars.io;
 
 import org.jetbrains.annotations.NotNull;
+import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.Syscall;
 
 public interface AbstractIO {
@@ -29,7 +31,7 @@ public interface AbstractIO {
      * @return double value corresponding to user input
      */
     default double readDouble() {
-        final var input = this.readImpl(
+        final var input = this.read(
             "0",
             "Enter a Double value (syscall %d)".formatted(
                 Syscall.ReadDouble.serviceNumber
@@ -46,7 +48,7 @@ public interface AbstractIO {
      * Feb 14 2005 Ken Vollmar
      */
     default float readFloat() {
-        final var input = this.readImpl(
+        final var input = this.read(
             "0", "Enter a Float value (syscall %d)".formatted(
                 Syscall.ReadFloat.serviceNumber
             ), -1
@@ -61,7 +63,7 @@ public interface AbstractIO {
      * @return int value corresponding to user input
      */
     default int readInt() {
-        final var input = this.readImpl(
+        final var input = this.read(
             "0", "Enter an Integer value (syscall %d)".formatted(
                 Syscall.ReadInt.serviceNumber
             ), -1
@@ -77,7 +79,7 @@ public interface AbstractIO {
      * @return the entered string, truncated to maximum length if necessary
      */
     default @NotNull String readString(final int maxLength) {
-        var input = this.readImpl(
+        var input = this.read(
             "",
             "Enter a string of maximum length %d (syscall %d)".formatted(
                 maxLength,
@@ -101,7 +103,7 @@ public interface AbstractIO {
      * @return char value corresponding to user input
      */
     default char readChar() {
-        final var input = this.readImpl(
+        final var input = this.read(
             "0",
             "Enter a character value (syscall %d)".formatted(
                 Syscall.ReadChar.serviceNumber
@@ -115,7 +117,7 @@ public interface AbstractIO {
         return input.charAt(0);
     }
 
-    String readImpl(
+    String read(
         final @NotNull String initialValue,
         final @NotNull String prompt,
         final int maxLength
@@ -186,6 +188,34 @@ public interface AbstractIO {
      * @return number of bytes read, 0 on EOF, or -1 on error
      */
     int readFromFile(final int fd, final byte[] myBuffer, final int lengthRequested);
+
+    /**
+     * Given a base address and display dimensions, displays memory context in
+     * a new window. When a window is present:
+     * <ul>
+     *     <li>
+     *         Calling the function with the same arguments doesn't affect the
+     *         window.
+     *     </li>
+     *     <li>
+     *         Calling the function with the same dimensions, but a different
+     *         base address updates the existing window with new contents.
+     *     </li>
+     *     <li>
+     *         Calling the function with different window dimensions disposes
+     *         of the current window and replaces it with a new one. To avoid
+     *         creating a window on each resize, the implementation may limit
+     *         the rate of such window disposals according to its own needs.
+     *     </li>
+     * </ul>
+     * 
+     * In the case of not supporting the display (i.e., in console mode), the
+     * implementation may throw an according notice to the simulator to notify
+     * of such a case.
+     * 
+     * @throws ExitingException in case the display is unsupported
+     */
+    void showDisplay(final int baseAddress, final int width, final int height, @NotNull ProgramStatement stmt) throws ExitingException;
 
     void flush();
 }

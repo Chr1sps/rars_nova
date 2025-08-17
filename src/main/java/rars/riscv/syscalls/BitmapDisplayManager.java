@@ -2,22 +2,23 @@ package rars.riscv.syscalls;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import rars.Globals;
 import rars.notices.SimulatorNotice;
 import rars.riscv.hardware.Memory;
+import rars.simulator.Simulator;
 import rars.util.BitmapDisplay;
 
-public final class DisplayBitmapImpl {
-    public static @NotNull DisplayBitmapImpl INSTANCE = new DisplayBitmapImpl(Globals.MEMORY_INSTANCE);
+public final class BitmapDisplayManager {
+    // public static @NotNull DisplayBitmapImpl INSTANCE = new DisplayBitmapImpl(Globals.MEMORY_INSTANCE);
     private final @NotNull Memory memory;
     private @Nullable BitmapDisplay display;
 
-    public DisplayBitmapImpl(
-        final @NotNull Memory memory
+    public BitmapDisplayManager(
+        final @NotNull Memory memory,
+        final @NotNull Simulator simulator
     ) {
         this.memory = memory;
         this.display = null;
-        Globals.SIMULATOR.simulatorNoticeHook.subscribe(notice -> {
+        simulator.simulatorNoticeHook.subscribe(notice -> {
             if (notice.action() == SimulatorNotice.Action.START) {
                 if (this.display != null) {
                     this.display.dispose();

@@ -9,6 +9,7 @@ import rars.io.AbstractIO;
 import rars.notices.SimulatorNotice;
 import rars.riscv.BasicInstruction;
 import rars.riscv.hardware.registerFiles.CSRegisterFile;
+import rars.riscv.syscalls.RandomStreams;
 import rars.settings.OtherSettings;
 import rars.util.BinaryUtils;
 import rars.util.ListenerDispatcher;
@@ -276,7 +277,8 @@ public class SimThread implements Runnable {
             Globals.FP_REGISTER_FILE,
             Globals.CS_REGISTER_FILE,
             Globals.MEMORY_INSTANCE,
-            this.io
+            this.io,
+            new RandomStreams()
         );
         while (!this.stop) {
             // Perform the RISCV instruction in synchronized block. If external threads

@@ -1,6 +1,8 @@
 package rars.io;
 
 import org.jetbrains.annotations.NotNull;
+import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.settings.BoolSettings;
 import rars.util.Lazy;
 
@@ -32,7 +34,7 @@ public final class ConsoleIO implements AbstractIO {
     }
 
     @Override
-    public @NotNull String readImpl(
+    public @NotNull String read(
         @NotNull final String initialValue,
         @NotNull final String prompt,
         final int maxLength
@@ -119,5 +121,18 @@ public final class ConsoleIO implements AbstractIO {
     @Override
     public void flush() {
 
+    }
+
+    @Override
+    public void showDisplay(
+        int baseAddress,
+        int width,
+        int height,
+        @NotNull ProgramStatement stmt
+    ) throws ExitingException {
+        throw new ExitingException(
+            stmt,
+            "the BitmapDisplay syscall (syscall 61) is not supported in the console"
+        );
     }
 }

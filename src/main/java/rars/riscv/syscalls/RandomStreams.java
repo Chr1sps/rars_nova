@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Random;
 
-import static rars.Globals.REGISTER_FILE;
 
 /*
 Copyright (c) 2003-2008,  Pete Sanderson and Kenneth Vollmar
@@ -41,30 +40,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * syscalls.
  */
 public final class RandomStreams {
-    /**
-     * Collection of pseudorandom number streams available for use in Rand-type
-     * syscalls.
-     * The streams are by default not seeded.
-     */
-    public static final HashMap<Integer, Random> randomStreams = new HashMap<>();
+    private final @NotNull HashMap<@NotNull Integer, @NotNull Random> randomStreams = new HashMap<>();
 
-    private RandomStreams() {
+    public @NotNull Random get(final int index) {
+        return randomStreams.computeIfAbsent(
+            index,
+            unused -> new Random()
+        );
     }
 
-    /**
-     * Just a little helper method to initialize streams on stream being empty
-     *
-     * @param reg
-     *     The name of the register that holds the stream index
-     * @return the stream a that index
-     */
-    public static @NotNull Random get(final String reg) {
-        final int index = REGISTER_FILE.getIntValue(reg);
-        Random stream = randomStreams.get(index);
-        if (stream == null) {
-            stream = new Random(); // create a non-seeded stream
-            RandomStreams.randomStreams.put(index, stream);
-        }
-        return stream;
+    public void setSeed(final int index, final int seed) {
+        get(index).setSeed(seed);
     }
 }

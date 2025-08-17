@@ -8,8 +8,6 @@ import rars.ProgramStatement;
 import rars.exceptions.AddressErrorException;
 import rars.exceptions.ExitingException;
 import rars.exceptions.SimulationException;
-import rars.riscv.syscalls.DisplayBitmapImpl;
-import rars.riscv.syscalls.RandomStreams;
 import rars.riscv.syscalls.ToneGenerator;
 import rars.simulator.SimulationContext;
 import rars.util.BinaryUtils;
@@ -17,7 +15,6 @@ import rars.util.NullString;
 
 import javax.swing.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
 
 @SuppressWarnings("DataFlowIssue")
 public enum Syscall implements SimulationCallback {
@@ -54,10 +51,11 @@ public enum Syscall implements SimulationCallback {
             a2 = height of the bitmap
             """,
         "N/A",
-        (stmt, ctxt) -> DisplayBitmapImpl.INSTANCE.show(
+        (stmt, ctxt) -> ctxt.io().showDisplay(
             ctxt.registerFile().getIntValue("a0"),
             ctxt.registerFile().getIntValue("a1"),
-            ctxt.registerFile().getIntValue("a2")
+            ctxt.registerFile().getIntValue("a2"),
+            stmt
         )
     ),
     Exit(
@@ -569,26 +567,26 @@ public enum Syscall implements SimulationCallback {
     ),
     RandDouble(
         "RandDouble", 44, "Get a random double from the range 0.0-1.0",
-        "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom", (stmt, ctxt) -> {
-        final Integer index = ctxt.registerFile().getIntValue("a0");
-        Random stream = RandomStreams.randomStreams.get(index);
-        if (stream == null) {
-            stream = new Random(); // create a non-seeded stream
-            RandomStreams.randomStreams.put(index, stream);
-        }
-        try {
-            ctxt.fpRegisterFile().updateRegisterByName("fa0", Double.doubleToRawLongBits(stream.nextDouble())
+        "a0 = index of pseudorandom number generator", "fa0 = the next pseudorandom",
+        (stmt, ctxt) -> {
+            final var stream = ctxt.randomStreams().get(
+                ctxt.registerFile().getIntValue("a0")
             );
-        } catch (rars.exceptions.SimulationException e) {
-            throw new RuntimeException(e);
+            try {
+                ctxt.fpRegisterFile().updateRegisterByName("fa0", Double.doubleToRawLongBits(stream.nextDouble())
+                );
+            } catch (rars.exceptions.SimulationException e) {
+                throw new RuntimeException(e);
+            }
         }
-    }
 
     ),
     RandFloat(
         "RandFloat", 43, "Get a random float", "a0 = index of pseudorandom number generator",
         "fa0 = uniformly randomly selected from from [0,1]", (stmt, ctxt) -> {
-        final Random stream = RandomStreams.get("a0");
+        final var stream = ctxt.randomStreams().get(
+            ctxt.registerFile().getIntValue("a0")
+        );
         ctxt.fpRegisterFile().updateRegisterByNameInt(
             "fa0",
             Float.floatToRawIntBits(stream.nextFloat())
@@ -602,7 +600,9 @@ public enum Syscall implements SimulationCallback {
         "a0 = index of pseudorandom number generator",
         "a0 = random integer",
         (stmt, ctxt) -> {
-            final Random stream = RandomStreams.get("a0");
+            final var stream = ctxt.randomStreams().get(
+                ctxt.registerFile().getIntValue("a0")
+            );
             ctxt.registerFile().updateRegisterByName("a0", stream.nextInt());
         }
     ),
@@ -611,8 +611,10 @@ public enum Syscall implements SimulationCallback {
         """
             a0 = index of pseudorandom number generator
             a1 = upper bound for random number""",
-        "a0 = uniformly selectect from [0,bound]", (stmt, ctxt) -> {
-        final var stream = RandomStreams.get("a0");
+        "a0 = uniformly select from [0,bound]", (stmt, ctxt) -> {
+        final var stream = ctxt.randomStreams().get(
+            ctxt.registerFile().getIntValue("a0")
+        );
         try {
             ctxt.registerFile().updateRegisterByName("a0", stream.nextInt(ctxt.registerFile().getIntValue("a1")));
         } catch (final IllegalArgumentException iae) {
@@ -629,12 +631,7 @@ public enum Syscall implements SimulationCallback {
             a0 = index of pseudorandom number generator
             a1 = the seed""", "N/A", (stmt, ctxt) -> {
         final var index = ctxt.registerFile().getIntValue("a0");
-        final Random stream = RandomStreams.randomStreams.get(index);
-        if (stream == null) {
-            RandomStreams.randomStreams.put(index, new Random(ctxt.registerFile().getIntValue("a1")));
-        } else {
-            stream.setSeed(ctxt.registerFile().getIntValue("a1"));
-        }
+        ctxt.randomStreams().setSeed(index, ctxt.registerFile().getIntValue("a1"));
     }
     ),
     Read(

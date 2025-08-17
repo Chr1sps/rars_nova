@@ -1,8 +1,12 @@
 package rars.io;
 
 import org.jetbrains.annotations.NotNull;
+import rars.ProgramStatement;
+import rars.riscv.hardware.Memory;
+import rars.riscv.syscalls.BitmapDisplayManager;
 import rars.settings.BoolSetting;
 import rars.settings.BoolSettings;
+import rars.simulator.Simulator;
 import rars.venus.MessagesPane;
 
 import java.nio.charset.StandardCharsets;
@@ -15,9 +19,12 @@ public final class VenusIO implements AbstractIO {
     private final @NotNull FileHandler fileHandler;
     private @NotNull String buffer;
     private long lastTime;
+    private final @NotNull BitmapDisplayManager displayManager;
 
     public VenusIO(
         final @NotNull MessagesPane messagesPane,
+        final @NotNull Memory memory,
+        final @NotNull Simulator simulator,
         final @NotNull BoolSettings boolSettings
     ) {
         super();
@@ -26,10 +33,11 @@ public final class VenusIO implements AbstractIO {
         this.fileHandler = new FileHandler(SYSCALL_MAXFILES - 3, this.boolSettings);
         this.buffer = "";
         this.lastTime = 0;
+        this.displayManager = new BitmapDisplayManager(memory, simulator);
     }
 
     @Override
-    public @NotNull String readImpl(
+    public @NotNull String read(
         @NotNull final String initialValue,
         @NotNull final String prompt,
         final int maxLength
@@ -111,5 +119,15 @@ public final class VenusIO implements AbstractIO {
         } else {
             this.buffer += message;
         }
+    }
+
+    @Override
+    public void showDisplay(
+        int baseAddress,
+        int width,
+        int height,
+        @NotNull ProgramStatement stmt
+    ) {
+        displayManager.show(baseAddress, width, height);
     }
 }

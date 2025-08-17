@@ -532,7 +532,12 @@ public final class VenusUI extends JFrame {
 
         // endregion Action objects
 
-        this.venusIO = new VenusIO(this.messagesPane, BOOL_SETTINGS);
+        this.venusIO = new VenusIO(
+            this.messagesPane,
+            Globals.MEMORY_INSTANCE,
+            Globals.SIMULATOR,
+            BOOL_SETTINGS
+        );
 
         this.menu = this.setUpMenuBar();
         this.setJMenuBar(this.menu);
