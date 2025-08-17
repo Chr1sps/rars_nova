@@ -1,6 +1,10 @@
 package rars.riscv.lang.lexing;
 
 public enum RVTokenType {
+    /**
+     * Denotes the end of the token list for a line in the document (EOL,
+     * basically).
+     */
     NULL,
     WHITESPACE,
     ERROR,
@@ -9,6 +13,10 @@ public enum RVTokenType {
     DIRECTIVE,
     OPERATOR,
 
+    /**
+     * Either register name or it's number with an according prefix (i.e.
+     * `fa0`, `x11`, etc.);
+     */
     REGISTER_NAME,
 
     IDENTIFIER,

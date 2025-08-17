@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public abstract class RegisterFileBase {
 
     protected final @NotNull Register @NotNull [] registers;
-    private final char registerNumberPrefix;
+    public final char registerNumberPrefix;
 
     protected RegisterFileBase(
         final char registerNumberPrefix,

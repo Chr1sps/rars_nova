@@ -2,6 +2,7 @@ package rars.venus.editors.rsyntaxtextarea;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
@@ -11,6 +12,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.jetbrains.annotations.NotNull;
+import rars.Globals;
 import rars.riscv.lang.lexing.RVTokenType;
 import rars.util.Pair;
 import rars.venus.editors.EditorTheme;
@@ -57,6 +59,23 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         this.textArea.setCodeFoldingEnabled(true);
         this.textArea.setMarkOccurrences(true);
         this.textArea.setMarkOccurrencesDelay(1);
+
+        // auto completion
+        final var provider = new RVCompletionProvider(
+            Globals.REGISTER_FILE,
+            Globals.FP_REGISTER_FILE,
+            Globals.CS_REGISTER_FILE
+        );
+        
+        final var autocompletion = new AutoCompletion(provider);
+        autocompletion.setShowDescWindow(true);
+        autocompletion.setAutoActivationEnabled(true);
+        autocompletion.setAutoActivationDelay(1);
+        autocompletion.install(textArea);
+        
+        // tool tips
+        this.textArea.setToolTipSupplier(provider);
+        ToolTipManager.sharedInstance().registerComponent(this.textArea);
     }
 
     @Override
