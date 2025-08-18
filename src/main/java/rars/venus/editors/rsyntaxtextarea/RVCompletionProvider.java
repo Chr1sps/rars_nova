@@ -105,10 +105,15 @@ public final class RVCompletionProvider extends DefaultCompletionProvider implem
         }
 
         @Override
-        public String getToolTipText() {
-            return getShortDescription()
-                + "\n\n"
-                + getSummary();
+        public @NotNull String getToolTipText() {
+            final var builder= new StringBuilder();
+            builder.append(getShortDescription());
+            final var summary = getSummary();
+            if (summary != null) {
+                builder.append("\n\n");
+                builder.append(summary);
+            }
+            return builder.toString();
         }
     }
 }
