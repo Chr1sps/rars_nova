@@ -55,7 +55,7 @@ public final class RunStepAction extends GuiAction {
 
     private String name;
     private ExecutePane executePane;
-    private @Nullable ListenerDispatcher.Handle<SimulatorNotice> listenerHandle;
+    private @Nullable ListenerDispatcher<SimulatorNotice>.Handle listenerHandle;
 
     public RunStepAction(
         final String name, final Icon icon, final String descrip,

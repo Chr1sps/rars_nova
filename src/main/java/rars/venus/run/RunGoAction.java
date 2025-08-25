@@ -59,7 +59,7 @@ public final class RunGoAction extends GuiAction {
     public static int maxSteps = RunGoAction.defaultMaxSteps;
     private String name;
     private ExecutePane executePane;
-    private @Nullable ListenerDispatcher.Handle<@NotNull SimulatorNotice> listenerHandle;
+    private @Nullable ListenerDispatcher<@NotNull SimulatorNotice>.Handle listenerHandle;
 
     public RunGoAction(
         final String name, final Icon icon, final String descrip,

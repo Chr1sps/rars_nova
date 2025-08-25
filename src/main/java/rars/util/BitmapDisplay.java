@@ -24,7 +24,7 @@ public final class BitmapDisplay extends JFrame {
     public final int displayHeight;
     private final @NotNull Grid grid;
     private final @NotNull GraphicsPanel panel;
-    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> listenerHandle;
+    private @Nullable ListenerDispatcher<@NotNull MemoryAccessNotice>.Handle listenerHandle;
     private final @NotNull Memory memory;
     public int baseAddress;
     private int upperAddressBound;
@@ -68,8 +68,7 @@ public final class BitmapDisplay extends JFrame {
     }
 
     public void changeBaseAddress(final int newBaseAddress) {
-        this.memory.deleteSubscriber(requireNonNull(this.listenerHandle));
-        this.listenerHandle = null;
+        this.unsubscribeFromMemory();
         this.baseAddress = newBaseAddress;
         this.upperAddressBound = newBaseAddress + (this.displayWidth * this.displayHeight * DataTypes.WORD_SIZE);
         try {

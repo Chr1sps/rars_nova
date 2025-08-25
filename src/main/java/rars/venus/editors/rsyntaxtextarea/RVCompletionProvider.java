@@ -60,7 +60,9 @@ public final class RVCompletionProvider extends DefaultCompletionProvider implem
 
     @Override
     protected boolean isValidChar(char ch) {
-        return super.isValidChar(ch) || ch == '.';
+        return Character.isLetterOrDigit(ch) ||
+            ch == '_' ||
+            ch == '.';
     }
 
     private static void addCompletionsForRegisterFile(
@@ -106,7 +108,7 @@ public final class RVCompletionProvider extends DefaultCompletionProvider implem
 
         @Override
         public @NotNull String getToolTipText() {
-            final var builder= new StringBuilder();
+            final var builder = new StringBuilder();
             builder.append(getShortDescription());
             final var summary = getSummary();
             if (summary != null) {

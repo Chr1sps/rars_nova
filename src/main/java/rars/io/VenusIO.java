@@ -32,7 +32,7 @@ public final class VenusIO implements AbstractIO {
         this.fileHandler = new FileHandler(SYSCALL_MAXFILES - 3, this.boolSettings);
         this.buffer = "";
         this.lastTime = 0;
-        this.displayManager = new BitmapDisplayManager(memory, simulator);
+        this.displayManager = new BitmapDisplayManager(memory, simulator, 1000);
     }
 
     @Override

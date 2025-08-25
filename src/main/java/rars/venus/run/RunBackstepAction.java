@@ -71,14 +71,20 @@ public final class RunBackstepAction extends GuiAction {
 
         if (OtherSettings.getBackSteppingEnabled()) {
             final var memoryHandle = Globals.MEMORY_INSTANCE.subscribe(executePane.dataSegment::processMemoryAccessNotice);
-            final var registersHandle = Globals.REGISTER_FILE.addRegistersListener(executePane.registerValues::processRegisterNotice);
-            final var csrHandle = Globals.CS_REGISTER_FILE.addRegistersListener(executePane.csrValues::processRegisterNotice);
-            final var fpHandle = Globals.FP_REGISTER_FILE.addRegistersListener(executePane.fpRegValues::processRegisterNotice);
+            final var registersHandle = Globals.REGISTER_FILE.registerChangeHook.subscribe(
+                executePane.registerValues::processRegisterNotice
+            );
+            final var csrHandle = Globals.CS_REGISTER_FILE.registerChangeHook.subscribe(
+                executePane.csrValues::processRegisterNotice
+            );
+            final var fpHandle = Globals.FP_REGISTER_FILE.registerChangeHook.subscribe(
+                executePane.fpRegValues::processRegisterNotice
+            );
             Globals.program.getBackStepper().backStep();
             Globals.MEMORY_INSTANCE.deleteSubscriber(memoryHandle);
-            Globals.REGISTER_FILE.deleteRegistersListener(registersHandle);
-            Globals.CS_REGISTER_FILE.deleteRegistersListener(csrHandle);
-            Globals.FP_REGISTER_FILE.deleteRegistersListener(fpHandle);
+            Globals.REGISTER_FILE.registerChangeHook.unsubscribe(registersHandle);
+            Globals.CS_REGISTER_FILE.registerChangeHook.unsubscribe(csrHandle);
+            Globals.FP_REGISTER_FILE.registerChangeHook.unsubscribe(fpHandle);
             executePane.registerValues.updateRegisters();
             executePane.fpRegValues.updateRegisters();
             executePane.csrValues.updateRegisters();

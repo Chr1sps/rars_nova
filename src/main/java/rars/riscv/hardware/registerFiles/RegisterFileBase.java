@@ -9,12 +9,15 @@ import rars.util.BinaryUtils;
 import rars.util.ListenerDispatcher;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 public abstract class RegisterFileBase {
 
     protected final @NotNull Register @NotNull [] registers;
     public final char registerNumberPrefix;
+    
+    private final @NotNull ArrayList<ListenerDispatcher<RegisterAccessNotice>.Handle> registerListeners;
+    private final @NotNull ListenerDispatcher<@NotNull RegisterAccessNotice> registerChangeDispatcher;
+    public final @NotNull ListenerDispatcher<@NotNull RegisterAccessNotice>.Hook registerChangeHook;
 
     protected RegisterFileBase(
         final char registerNumberPrefix,
@@ -22,6 +25,15 @@ public abstract class RegisterFileBase {
     ) {
         this.registerNumberPrefix = registerNumberPrefix;
         this.registers = registers;
+        this.registerListeners = new ArrayList<>(registers.length);
+        this.registerChangeDispatcher = new ListenerDispatcher<>();
+        this.registerChangeHook = this.registerChangeDispatcher.getHook();
+        for (final var register : this.registers) {
+            final var handle = register.registerChangeHook.subscribe(
+                this.registerChangeDispatcher::dispatch
+            );
+            this.registerListeners.add(handle);
+        }
     }
 
     public final @Nullable Long updateRegisterByName(final @NotNull String registerName, final long newValue) throws
@@ -138,24 +150,6 @@ public abstract class RegisterFileBase {
     public void resetRegisters() {
         for (final var register : this.registers) {
             register.resetValue();
-        }
-    }
-
-    public @NotNull ListenerDispatcher.Handle<@NotNull RegisterAccessNotice> addRegistersListener(
-        final @NotNull Consumer<? super RegisterAccessNotice> listener
-    ) {
-        final var handles = new ArrayList<ListenerDispatcher.Handle<RegisterAccessNotice>>(registers.length);
-        for (final var register : this.registers) {
-            final var handle = register.registerChangeHook.subscribe(listener);
-            handles.add(handle);
-        }
-
-        return ListenerDispatcher.Handle.compound(handles);   
-    }
-
-    public void deleteRegistersListener(final @NotNull ListenerDispatcher.Handle<? super RegisterAccessNotice> listener) {
-        for (final var register : this.registers) {
-            register.registerChangeHook.unsubscribe(listener);
         }
     }
 }

@@ -49,26 +49,26 @@ public final class PickerCardView extends JPanel {
     }
 
     public void showBaseStyleView() {
-        upperLayout.show(upperPanel, "base");
+        upperLayout.show(upperPanel, BASE);
     }
 
     public void showFontView() {
-        upperLayout.show(upperPanel, "font");
+        upperLayout.show(upperPanel, FONT);
     }
 
     public void showSyntaxStyleView() {
-        upperLayout.show(upperPanel, "syntax");
+        upperLayout.show(upperPanel, SYNTAX);
     }
 
     public void showEmpty() {
-        upperLayout.show(upperPanel, "empty");
+        upperLayout.show(upperPanel, EMPTY);
     }
 
     public void showOtherSettings() {
-        upperLayout.show(upperPanel, "other");
+        upperLayout.show(upperPanel, OTHER);
     }
 
     public void showPresets() {
-        upperLayout.show(upperPanel, "presets");
+        upperLayout.show(upperPanel, PRESETS);
     }
 }

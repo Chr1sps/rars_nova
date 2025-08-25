@@ -164,7 +164,7 @@ public final class EditorThemeSettings {
     private @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> loadTokenStylesFromPreferences(
         final @NotNull Map<@NotNull TokenSettingKey, @NotNull TokenStyle> defaultColorScheme
     ) {
-        final var styleMap = new HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle>();
+        final var styleMap = new HashMap<@NotNull TokenSettingKey, @NotNull TokenStyle>(TokenSettingKey.values().length);
         for (final var type : TokenSettingKey.values()) {
             styleMap.put(type, loadTokenStyleFromPreferences(type, defaultColorScheme.get(type)));
         }

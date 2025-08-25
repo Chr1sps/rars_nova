@@ -22,7 +22,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.Objects;
+import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 import static rars.Globals.*;
@@ -67,7 +67,7 @@ public abstract class RegisterBlockWindowBase extends JPanel {
     private static final int NUMBER_SIZE = 45;
     private static final int NAME_SIZE = 80;
     private static final int VALUE_SIZE = 160;
-    private @Nullable ListenerDispatcher.Handle<@NotNull RegisterAccessNotice> listenerHandle;
+    private @Nullable ListenerDispatcher<@NotNull RegisterAccessNotice>.Handle listenerHandle;
     private final @NotNull JTable table;
     private final @NotNull RegisterFileBase registerFile;
     @NotNull
@@ -152,12 +152,12 @@ public abstract class RegisterBlockWindowBase extends JPanel {
     protected abstract @NotNull String formatRegisterValue(final long value, int base);
 
     private void beginObserving() {
-        this.listenerHandle = this.registerFile.addRegistersListener(this::processRegisterNotice);
+        this.listenerHandle = this.registerFile.registerChangeHook.subscribe(this::processRegisterNotice);
     }
 
     private void endObserving() {
         if (this.listenerHandle != null) {
-            this.registerFile.deleteRegistersListener(this.listenerHandle);
+            this.registerFile.registerChangeHook.unsubscribe(this.listenerHandle);
             this.listenerHandle = null;
         }
     }

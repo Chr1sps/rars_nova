@@ -8,25 +8,9 @@ import rars.settings.BoolSettings;
 import java.io.*;
 import java.nio.channels.FileChannel;
 
+import static rars.io.AbstractIO.*;
+
 /*internal*/ final class FileHandler {
-    private static final int SYSCALL_MAXFILES = 32;
-
-    private static final int STDIN = 0;
-    private static final int STDOUT = 1;
-    private static final int STDERR = 2;
-
-    private static final int O_RDONLY = 0x00000000;
-    private static final int O_WRONLY = 0x00000001;
-    private static final int O_RDWR = 0x00000002;
-    private static final int O_APPEND = 0x00000008;
-    private static final int O_CREAT = 0x00000200; // 512
-    private static final int O_TRUNC = 0x00000400; // 1024
-    private static final int O_EXCL = 0x00000800; // 2048
-
-    private static final int SEEK_SET = 0;
-    private static final int SEEK_CUR = 1;
-    private static final int SEEK_END = 2;
-
     private final int fdCount;
     private final FileEntry[] entries;
 

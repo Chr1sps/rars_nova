@@ -381,7 +381,7 @@ public final class MessagesPane extends JTabbedPane {
         private final @NotNull NavigationFilter navigationFilter;
         private final @NotNull Consumer<Void> stopListener;
         private int initialPos;
-        private @Nullable ListenerDispatcher.Handle<Void> handle;
+        private @Nullable ListenerDispatcher<Void>.Handle handle;
 
         public Asker(final int maxLen) {
             this.maxLen = maxLen;

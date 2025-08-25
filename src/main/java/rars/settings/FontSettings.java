@@ -113,6 +113,7 @@ public final class FontSettings {
         preferences.put(FONT_PREFIX + FAMILY, fontFamily);
         preferences.putInt(FONT_PREFIX + SIZE, fontSize);
         preferences.putBoolean(FONT_PREFIX + LIGATURES, isLigaturized);
+        preferences.put(FONT_PREFIX + WEIGHT, fontWeight.name());
         try {
             this.preferences.flush();
         } catch (final SecurityException se) {

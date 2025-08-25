@@ -1023,7 +1023,7 @@ public final class Memory {
     /**
      * Method to accept registration from observer for any memory address.
      */
-    public @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> subscribe(
+    public @NotNull ListenerDispatcher<MemoryAccessNotice>.Handle subscribe(
         final @NotNull Consumer<? super MemoryAccessNotice> listener
     ) {
         try {
@@ -1046,7 +1046,7 @@ public final class Memory {
      * @throws AddressErrorException
      *     if any.
      */
-    public @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> subscribe(
+    public @NotNull ListenerDispatcher<MemoryAccessNotice>.Handle subscribe(
         final @NotNull Consumer<? super MemoryAccessNotice> obs,
         final int addr
     ) throws AddressErrorException {
@@ -1070,7 +1070,7 @@ public final class Memory {
      * @throws AddressErrorException
      *     if any.
      */
-    public @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> subscribe(
+    public @NotNull ListenerDispatcher<MemoryAccessNotice>.Handle subscribe(
         final @NotNull Consumer<? super MemoryAccessNotice> listener,
         final int startAddr,
         final int endAddr
@@ -1092,7 +1092,7 @@ public final class Memory {
     /**
      * Remove specified memory observers
      */
-    public void deleteSubscriber(final @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> listener) {
+    public void deleteSubscriber(final @NotNull ListenerDispatcher<MemoryAccessNotice>.Handle listener) {
         for (final var observable : this.observables) {
             observable.hook.unsubscribe(listener);
         }
@@ -1378,7 +1378,7 @@ public final class Memory {
         public final @NotNull ListenerDispatcher<@NotNull MemoryAccessNotice>.Hook hook;
         private final int lowAddress;
         private final int highAddress;
-        final @NotNull ListenerDispatcher.Handle<MemoryAccessNotice> handle;
+        final @NotNull ListenerDispatcher<MemoryAccessNotice>.Handle handle;
 
         public MemoryObservable(
             final @NotNull Consumer<? super MemoryAccessNotice> listener,

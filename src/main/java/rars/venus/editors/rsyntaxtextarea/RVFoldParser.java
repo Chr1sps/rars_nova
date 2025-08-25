@@ -7,15 +7,13 @@ import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import rars.assembler.Directive;
 import rars.riscv.lang.lexing.RVTokenType;
 import rars.util.RefCell;
 
 import javax.swing.text.BadLocationException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
@@ -77,9 +75,14 @@ final class RVFoldParser implements FoldParser {
         final @NotNull Fold baseFold,
         final @NotNull List<FoldData> children
     ) {
-        children.stream().sorted(Comparator.comparingInt(FoldData::startLine)).forEach(childData -> {
+        children.stream().sorted(
+            Comparator.comparingInt(FoldData::startLine)
+        ).forEach(childData -> {
             try {
-                final var childFold = baseFold.createChild(childData.baseFold().getFoldType(), childData.startOffset());
+                final var childFold = baseFold.createChild(
+                    childData.baseFold().getFoldType(),
+                    childData.startOffset()
+                );
                 childFold.setEndOffset(childData.endOffset());
                 createFoldFromFoldDataRec(childFold, childData.children());
             } catch (final BadLocationException e) {
@@ -104,8 +107,10 @@ final class RVFoldParser implements FoldParser {
             for (final var fold : list) {
                 foldMap.merge(
                     fold.getStartLine(), fold,
-                    (existing, replacement) -> replacement.getEndLine() > existing.getEndLine() ? replacement :
-                        existing
+                    (existing, replacement) ->
+                        replacement.getEndLine() > existing.getEndLine()
+                            ? replacement
+                            : existing
                 );
             }
         }
@@ -120,8 +125,13 @@ final class RVFoldParser implements FoldParser {
         for (final var region : regions) {
             final var intersectingRegions = result
                 .stream()
-                .filter(fold -> doFoldsIntersect(fold, region)).toList();
-            if (intersectingRegions.stream().noneMatch(fold -> fold.getFoldType() != RVFoldType.COMMENT)) {
+                .filter(fold ->
+                    doFoldsIntersect(fold, region)
+                )
+                .toList();
+            if (intersectingRegions.stream().allMatch(fold ->
+                fold.getFoldType() == RVFoldType.COMMENT)
+            ) {
                 // the remaining conflicting folds are all comments and, thus, have lower priority
                 // we can safely remove them
                 result.removeAll(intersectingRegions);
@@ -133,7 +143,7 @@ final class RVFoldParser implements FoldParser {
 
     // region getFolds methods
 
-    private static @NotNull List<Fold> getFoldsBase(
+    private static @NotNull List<Fold> calculateFolds(
         final @NotNull RSyntaxTextArea textArea,
         final @NotNull FoldParserCallback callback
     ) {
@@ -152,7 +162,7 @@ final class RVFoldParser implements FoldParser {
     }
 
     private static @NotNull List<Fold> getFoldsForLabels(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(
+        return calculateFolds(
             textArea, (lineNumber, tokens, folds, fold) -> {
                 if (hasALabel(tokens)) {
                     if (fold.value != null && fold.value.isOnSingleLine()) {
@@ -177,7 +187,7 @@ final class RVFoldParser implements FoldParser {
     }
 
     private static @NotNull List<Fold> getCommentFolds(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(
+        return calculateFolds(
             textArea, (lineNumber, tokens, folds, fold) -> {
                 if (isCommentLine(tokens)) {
                     if (fold.value == null) {
@@ -196,7 +206,7 @@ final class RVFoldParser implements FoldParser {
     }
 
     private static @NotNull List<Fold> getFoldsForInstructionBlocks(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(
+        return calculateFolds(
             textArea, (lineNumber, tokens, folds, fold) -> {
                 if (isInstructionLine(tokens)) {
                     if (fold.value == null) {
@@ -217,7 +227,7 @@ final class RVFoldParser implements FoldParser {
 
     private static @NotNull List<Fold> getRegionFolds(final @NotNull RSyntaxTextArea textArea) {
         final var regionStack = new ArrayList<Fold>();
-        return getFoldsBase(
+        return calculateFolds(
             textArea, (
                 (lineNumber, tokens, folds, currentFold) -> {
                     if (isCommentLine(tokens)) {
@@ -249,7 +259,7 @@ final class RVFoldParser implements FoldParser {
     }
 
     private static @NotNull List<Fold> getMacroFolds(final @NotNull RSyntaxTextArea textArea) {
-        return getFoldsBase(
+        return calculateFolds(
             textArea, (lineNumber, tokens, folds, fold) -> {
                 if (isMacroStartLine(tokens)) {
                     if (fold.value == null) {

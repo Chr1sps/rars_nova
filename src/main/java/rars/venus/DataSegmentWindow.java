@@ -131,7 +131,7 @@ public final class DataSegmentWindow extends JInternalFrame {
     private int[] displayBaseAddresses;
     private int defaultBaseAddressIndex;
     private JButton[] baseAddressButtons;
-    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> listenerHandle;
+    private @Nullable ListenerDispatcher<@NotNull MemoryAccessNotice>.Handle listenerHandle;
 
     /**
      * Constructor for the Data Segment window.

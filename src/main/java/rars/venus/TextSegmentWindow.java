@@ -105,7 +105,7 @@ public final class TextSegmentWindow extends JInternalFrame {
             this.updateTable(notice.address, notice.value);
         }
     };
-    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> listenerHandle;
+    private @Nullable ListenerDispatcher<@NotNull MemoryAccessNotice>.Handle listenerHandle;
     private boolean codeHighlighting;
     private boolean breakpointsEnabled; // Added 31 Dec 2009
     private int highlightAddress;

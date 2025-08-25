@@ -41,16 +41,18 @@ description = "RARS Nova"
 
 tasks {
     compileJava {
-        options.encoding = "UTF-8"
+        options.apply {
+            encoding = "UTF-8"
+            release = 21
+        }
     }
     shadowJar {
-        archiveBaseName.set("rars-nova")
-        archiveClassifier.set("")
-        mergeServiceFiles()
+        archiveBaseName = "rars-nova"
+        archiveClassifier = ""
         manifest {
             attributes(
                 "Main-Class" to "rars.Main",
-                "Multi-Release" to "true"
+//                "Multi-Release" to "true"
             )
         }
     }

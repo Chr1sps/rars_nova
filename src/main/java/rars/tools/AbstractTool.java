@@ -73,8 +73,8 @@ public abstract class AbstractTool extends JFrame {
     private final EmptyBorder emptyBorder = new EmptyBorder(4, 4, 4, 4);
     private final int lowMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().dataSegmentBaseAddress;
     private final int highMemoryAddress = Globals.MEMORY_INSTANCE.getMemoryConfiguration().stackBaseAddress;
-    private @Nullable ListenerDispatcher.Handle<@NotNull RegisterAccessNotice> registerListenerHandle;
-    private @Nullable ListenerDispatcher.Handle<@NotNull MemoryAccessNotice> memoryListenerHandle;
+    private @Nullable ListenerDispatcher<@NotNull RegisterAccessNotice>.Handle registerListenerHandle;
+    private @Nullable ListenerDispatcher<@NotNull MemoryAccessNotice>.Handle memoryListenerHandle;
     protected Window theWindow; // highest level GUI component (a JFrame for app, a JDialog for Tool)
     protected ConnectButton connectButton;
     protected JDialog dialog; //  This is the pop-up dialog that appears when menu item is selected.

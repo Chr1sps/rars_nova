@@ -117,7 +117,7 @@ public interface AbstractIO {
         return input.charAt(0);
     }
 
-    String read(
+    @NotNull String read(
         final @NotNull String initialValue,
         final @NotNull String prompt,
         final int maxLength
