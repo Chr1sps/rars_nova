@@ -9,29 +9,34 @@ import java.awt.*;
  * Class that represents the panel for visualizing and animating memory reference patterns.
  */
 public final class GraphicsPanel extends JPanel {
-    private final Grid grid;
-
-    public GraphicsPanel(final @NotNull Dimension size, final @NotNull Grid grid) {
+    private final int[][] colors;
+    private final int columns, rows;
+    
+    public GraphicsPanel(final int columns, final int rows) {
         super();
-        this.grid = grid;
+        this.colors = new int[rows][columns];
+        this.columns = columns;
+        this.rows = rows;
+        final var size = new Dimension(columns, rows);
         this.setMinimumSize(size);
         this.setPreferredSize(size);
         this.setMaximumSize(size);
     }
 
-    public GraphicsPanel(final @NotNull Dimension size) {
-        this(size, new Grid(size.height, size.width));
+    public void paintPixel(final int row, final int col, final int color) {
+        this.colors[row][col] = color;
+        this.repaint(col, this.rows - row - 1, 1, 1);
     }
 
     @Override
     public void paint(final @NotNull Graphics g) {
         // override default paint method to assure display updated correctly every time
         // the panel is repainted.
-        for (int row = 0; row < this.grid.rows; row++) {
-            for (int col = 0; col < this.grid.columns; col++) {
-                final var color = this.grid.grid[row][col];
-                g.setColor(color);
-                g.fillRect(col, grid.rows - row - 1, 1, 1);
+        for (int row = 0; row < this.rows; row++) {
+            for (int col = 0; col < this.columns; col++) {
+                final var color = this.colors[row][col];
+                g.setColor(new Color(color));
+                g.fillRect(col, this.rows - row - 1, 1, 1);
             }
         }
     }
