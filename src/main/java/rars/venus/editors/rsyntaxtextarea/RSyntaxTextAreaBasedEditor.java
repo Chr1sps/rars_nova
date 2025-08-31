@@ -70,7 +70,8 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         final var autocompletion = new AutoCompletion(provider);
         autocompletion.setShowDescWindow(true);
         autocompletion.setAutoActivationEnabled(true);
-        autocompletion.setAutoActivationDelay(1);
+        autocompletion.setAutoCompleteSingleChoices(false);
+        autocompletion.setAutoActivationDelay(300);
         autocompletion.install(textArea);
         
         // tool tips
@@ -95,6 +96,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
         context.setMatchCase(caseSensitive);
         context.setSearchForward(true);
         context.setMarkAll(false);
+        context.setSearchWrap(true);
 
         final var found = SearchEngine.find(textArea, context);
         if (found.wasFound()) {

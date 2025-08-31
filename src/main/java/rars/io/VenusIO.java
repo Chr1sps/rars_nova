@@ -2,11 +2,13 @@ package rars.io;
 
 import org.jetbrains.annotations.NotNull;
 import rars.ProgramStatement;
+import rars.exceptions.ExitingException;
 import rars.riscv.hardware.Memory;
 import rars.settings.BoolSetting;
 import rars.settings.BoolSettings;
 import rars.simulator.Simulator;
 import rars.venus.MessagesPane;
+import rars.venus.VenusUI;
 
 import java.nio.charset.StandardCharsets;
 
@@ -21,18 +23,20 @@ public final class VenusIO implements AbstractIO {
     private final @NotNull BitmapDisplayManager displayManager;
 
     public VenusIO(
-        final @NotNull MessagesPane messagesPane,
+        // final @NotNull MessagesPane messagesPane,
+        final @NotNull VenusUI mainUI,
         final @NotNull Memory memory,
         final @NotNull Simulator simulator,
         final @NotNull BoolSettings boolSettings
     ) {
         super();
-        this.messagesPane = messagesPane;
+        this.messagesPane = mainUI.messagesPane;
         this.boolSettings = boolSettings;
         this.fileHandler = new FileHandler(SYSCALL_MAXFILES - 3, this.boolSettings);
         this.buffer = "";
         this.lastTime = 0;
-        this.displayManager = new BitmapDisplayManager(memory, simulator, 1000);
+        this.displayManager = new BitmapDisplayManager(
+            mainUI, memory, simulator, 100);
     }
 
     @Override
@@ -126,7 +130,7 @@ public final class VenusIO implements AbstractIO {
         int width,
         int height,
         @NotNull ProgramStatement stmt
-    ) {
-        displayManager.show(baseAddress, width, height);
+    ) throws ExitingException {
+        displayManager.show(baseAddress, width, height, stmt);
     }
 }

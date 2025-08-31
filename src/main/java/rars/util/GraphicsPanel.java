@@ -11,16 +11,29 @@ import java.awt.*;
 public final class GraphicsPanel extends JPanel {
     private final int[][] colors;
     private final int columns, rows;
+    private final @NotNull Dimension size;
     
     public GraphicsPanel(final int columns, final int rows) {
         super();
         this.colors = new int[rows][columns];
         this.columns = columns;
         this.rows = rows;
-        final var size = new Dimension(columns, rows);
-        this.setMinimumSize(size);
-        this.setPreferredSize(size);
-        this.setMaximumSize(size);
+        this.size = new Dimension(columns, rows);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return this.size;
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return this.size;
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return this.size;
     }
 
     public void paintPixel(final int row, final int col, final int color) {

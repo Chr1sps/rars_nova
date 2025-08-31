@@ -1089,13 +1089,10 @@ public final class Memory {
         return observable.handle;
     }
 
-    /**
-     * Remove specified memory observers
-     */
     public void deleteSubscriber(final @NotNull ListenerDispatcher<MemoryAccessNotice>.Handle listener) {
-        for (final var observable : this.observables) {
-            observable.hook.unsubscribe(listener);
-        }
+        this.observables.removeIf(observable ->
+            observable.handle == listener
+        );
     }
 
     /// Method to notify any observers of memory operation that has just occurred.
@@ -1109,9 +1106,10 @@ public final class Memory {
         final int length,
         final int value
     ) {
-        this.observables.stream()
-            .filter((mo) -> mo.match(address))
-            .forEach((mo) -> mo.dispatcher.dispatch(new MemoryAccessNotice(
+        this.observables
+            .stream()
+            .filter(mo -> mo.match(address))
+            .forEach(mo -> mo.dispatcher.dispatch(new MemoryAccessNotice(
                 type,
                 address,
                 length,
@@ -1375,7 +1373,6 @@ public final class Memory {
      */
     private static class MemoryObservable implements Comparable<MemoryObservable> {
         public final @NotNull ListenerDispatcher<@NotNull MemoryAccessNotice> dispatcher;
-        public final @NotNull ListenerDispatcher<@NotNull MemoryAccessNotice>.Hook hook;
         private final int lowAddress;
         private final int highAddress;
         final @NotNull ListenerDispatcher<MemoryAccessNotice>.Handle handle;
@@ -1388,8 +1385,8 @@ public final class Memory {
             this.lowAddress = startAddr;
             this.highAddress = endAddr;
             this.dispatcher = new ListenerDispatcher<>();
-            this.hook = this.dispatcher.getHook();
-            this.handle = this.hook.subscribe(listener);
+            final var hook = this.dispatcher.getHook();
+            this.handle = hook.subscribe(listener);
         }
 
         public boolean match(final int address) {

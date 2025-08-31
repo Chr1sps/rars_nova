@@ -9,10 +9,9 @@ import rars.exceptions.AddressErrorException;
 import rars.notices.AccessNotice;
 import rars.notices.MemoryAccessNotice;
 import rars.riscv.hardware.Memory;
+import rars.venus.VenusUI;
 
 import javax.swing.*;
-
-import static java.util.Objects.requireNonNull;
 
 public final class BitmapDisplay extends JFrame {
 
@@ -23,11 +22,12 @@ public final class BitmapDisplay extends JFrame {
     private final @NotNull GraphicsPanel panel;
     private @Nullable ListenerDispatcher<@NotNull MemoryAccessNotice>.Handle listenerHandle;
     private final @NotNull Memory memory;
-    public int baseAddress;
+    private int baseAddress;
     private int upperAddressBound;
 
     public BitmapDisplay(
         final @NotNull Memory memory,
+        final @NotNull VenusUI mainUI,
         final int baseAddress,
         final int displayWidth,
         final int displayHeight
@@ -45,6 +45,7 @@ public final class BitmapDisplay extends JFrame {
         
         this.add(this.panel);
         this.setResizable(false);
+        this.setLocationRelativeTo(mainUI);
 
         this.fillGrid();
         this.pack();
@@ -80,8 +81,14 @@ public final class BitmapDisplay extends JFrame {
     }
 
     public void unsubscribeFromMemory() {
-        this.memory.deleteSubscriber(requireNonNull(this.listenerHandle));
+        if (this.listenerHandle != null) {
+            this.memory.deleteSubscriber(this.listenerHandle);
+        }
         this.listenerHandle = null;
+    }
+    
+    public int getBaseAddress() {
+        return this.baseAddress;
     }
 
     private void fillGrid() {
