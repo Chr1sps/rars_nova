@@ -13,7 +13,7 @@ import java.io.Reader;
 /** @noinspection All */
 @SuppressWarnings({"fallthrough", "UnnecessaryUnicodeEscape", "SameParameterValue", "UnusedAssignment", "CStyleArrayDeclaration", "FieldCanBeLocal", "unused"})
 
-public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P> {
+public final class RVLexer<T, P extends TokenBuilder<T>> implements Lexer<T, P> {
 
   /** This character denotes the end of file. */
   public static final int YYEOF = -1;
@@ -320,7 +320,7 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
   /* user code: */
     private Segment s;
             private int offsetShift;
-            private P producer;
+            private P builder;
         
             public RVLexer() {
                 super();
@@ -356,16 +356,16 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
              *                    occurs.
              */
             private void addToken(final char[] array, final int start, final int end, final RVTokenType tokenType, final int startOffset) {
-                producer.addToken(array, start, end, tokenType, startOffset);
+                builder.addToken(array, start, end, tokenType, startOffset);
                 zzStartRead = zzMarkedPos;
             }
             
             private void addNullToken() {
-                this.producer.addNullToken(zzBuffer, zzStartRead, getOffset(zzStartRead));
+                this.builder.addNullToken(zzBuffer, zzStartRead, getOffset(zzStartRead));
             }
             
             private void addErrorToken(String notice) {
-                this.producer.addErrorToken(zzBuffer, zzStartRead, getOffset(zzStartRead), notice);
+                this.builder.addErrorToken(zzBuffer, zzStartRead, getOffset(zzStartRead), notice);
             }
             
             private int getOffset(int start) {
@@ -374,7 +374,7 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
             
             
             private T getResult() {
-                return this.producer.getResult();
+                return this.builder.getResult();
             }
         
             /**
@@ -390,10 +390,9 @@ public final class RVLexer<T, P extends TokensProducer<T>> implements Lexer<T, P
              *         the syntax highlighted text.
              */
             @Override
-            public T getTokensList(Segment text, int initialTokenType, int lineOffset, P producer) {
+            public T getTokensList(Segment text, int initialTokenType, int lineOffset, P builder) {
         
-                this.producer = producer;
-        //		resetTokenList();
+                this.builder = builder;
                 this.offsetShift = -text.offset + lineOffset;
         
                 // Start off in the proper state.

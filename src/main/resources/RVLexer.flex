@@ -12,7 +12,7 @@ import java.io.Reader;
 
 %public
 %final
-%class RVLexer<T, P extends TokensProducer<T>>
+%class RVLexer<T, P extends TokenBuilder<T>>
 %implements Lexer<T, P>
 %no_suppress_warnings
 %unicode
@@ -22,7 +22,7 @@ import java.io.Reader;
 %{
     private Segment s;
             private int offsetShift;
-            private P producer;
+            private P builder;
         
             public RVLexer() {
                 super();
@@ -58,16 +58,16 @@ import java.io.Reader;
              *                    occurs.
              */
             private void addToken(final char[] array, final int start, final int end, final RVTokenType tokenType, final int startOffset) {
-                producer.addToken(array, start, end, tokenType, startOffset);
+                builder.addToken(array, start, end, tokenType, startOffset);
                 zzStartRead = zzMarkedPos;
             }
             
             private void addNullToken() {
-                this.producer.addNullToken(zzBuffer, zzStartRead, getOffset(zzStartRead));
+                this.builder.addNullToken(zzBuffer, zzStartRead, getOffset(zzStartRead));
             }
             
             private void addErrorToken(String notice) {
-                this.producer.addErrorToken(zzBuffer, zzStartRead, getOffset(zzStartRead), notice);
+                this.builder.addErrorToken(zzBuffer, zzStartRead, getOffset(zzStartRead), notice);
             }
             
             private int getOffset(int start) {
@@ -76,7 +76,7 @@ import java.io.Reader;
             
             
             private T getResult() {
-                return this.producer.getResult();
+                return this.builder.getResult();
             }
         
             /**
@@ -92,10 +92,9 @@ import java.io.Reader;
              *         the syntax highlighted text.
              */
             @Override
-            public T getTokensList(Segment text, int initialTokenType, int lineOffset, P producer) {
+            public T getTokensList(Segment text, int initialTokenType, int lineOffset, P builder) {
         
-                this.producer = producer;
-        //		resetTokenList();
+                this.builder = builder;
                 this.offsetShift = -text.offset + lineOffset;
         
                 // Start off in the proper state.

@@ -10,15 +10,15 @@ import javax.swing.text.Segment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RVTokensProducer implements TokensProducer<TokenizedLine> {
-    private final Lexer<TokenizedLine, RVTokensProducer> lexer;
+public class RVTokenBuilder implements TokenBuilder<TokenizedLine> {
+    private final Lexer<TokenizedLine, RVTokenBuilder> lexer;
     private final @NotNull RISCVProgram program;
     private final @NotNull ErrorList errorList;
     private @NotNull ArrayList<@NotNull RVToken> result;
     private int lineNum;
 
-    public RVTokensProducer(
-        final @NotNull Lexer<TokenizedLine, RVTokensProducer> lexer,
+    public RVTokenBuilder(
+        final @NotNull Lexer<TokenizedLine, RVTokenBuilder> lexer,
         final @NotNull RISCVProgram program,
         final @NotNull ErrorList errorList
     ) {
@@ -28,7 +28,7 @@ public class RVTokensProducer implements TokensProducer<TokenizedLine> {
         this.result = new ArrayList<>();
     }
 
-    public RVTokensProducer(
+    public RVTokenBuilder(
         final @NotNull RISCVProgram program,
         final @NotNull ErrorList errorList
     ) {
@@ -64,7 +64,7 @@ public class RVTokensProducer implements TokensProducer<TokenizedLine> {
     @Override
     public void addErrorToken(final char[] array, final int segmentPos, final int offset, final String notice) {
         this.errorList.add(ErrorMessage.error(this.program, this.lineNum, offset, notice));
-        TokensProducer.super.addErrorToken(array, segmentPos, offset, notice);
+        TokenBuilder.super.addErrorToken(array, segmentPos, offset, notice);
     }
 
     @Override

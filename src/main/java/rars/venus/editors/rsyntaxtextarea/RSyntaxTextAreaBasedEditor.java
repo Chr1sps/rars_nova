@@ -39,7 +39,7 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     static {
         FoldParserManager.get().addFoldParserMapping(SYNTAX_STYLE_RISCV, new RVFoldParser());
         final var factory = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-        factory.putMapping(SYNTAX_STYLE_RISCV, RSTATokensProducer.class.getName());
+        factory.putMapping(SYNTAX_STYLE_RISCV, RSTATokenBuilder.class.getName());
     }
 
     private final @NotNull RSyntaxTextArea textArea;

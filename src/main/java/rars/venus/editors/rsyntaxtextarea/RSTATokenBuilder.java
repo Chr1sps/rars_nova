@@ -7,22 +7,22 @@ import org.jetbrains.annotations.NotNull;
 import rars.riscv.lang.lexing.Lexer;
 import rars.riscv.lang.lexing.RVLexer;
 import rars.riscv.lang.lexing.RVTokenType;
-import rars.riscv.lang.lexing.TokensProducer;
+import rars.riscv.lang.lexing.TokenBuilder;
 
 import javax.swing.text.Segment;
 
 import static rars.venus.editors.rsyntaxtextarea.RSTAUtils.tokenValue;
 
 @SuppressWarnings("unused")
-public final class RSTATokensProducer extends TokenMakerBase implements TokensProducer<Token> {
+public final class RSTATokenBuilder extends TokenMakerBase implements TokenBuilder<Token> {
     private static final String[] LINE_COMMENT_START_AND_END = {"#", null};
-    private final Lexer<@NotNull Token, RSTATokensProducer> lexer;
+    private final Lexer<@NotNull Token, RSTATokenBuilder> lexer;
 
-    public RSTATokensProducer(final Lexer<@NotNull Token, RSTATokensProducer> lexer) {
+    public RSTATokenBuilder(final Lexer<@NotNull Token, RSTATokenBuilder> lexer) {
         this.lexer = lexer;
     }
 
-    public RSTATokensProducer() {
+    public RSTATokenBuilder() {
         this(new RVLexer<>());
     }
 

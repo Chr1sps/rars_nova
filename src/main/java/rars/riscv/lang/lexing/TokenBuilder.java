@@ -2,7 +2,7 @@ package rars.riscv.lang.lexing;
 
 import javax.swing.text.Segment;
 
-public interface TokensProducer<CollectionType> {
+public interface TokenBuilder<CollectionType> {
     void addToken(
         char[] array, int start, int end, RVTokenType tokenType,
         int startOffset
