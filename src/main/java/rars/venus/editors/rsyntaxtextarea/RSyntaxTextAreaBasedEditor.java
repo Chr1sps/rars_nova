@@ -3,14 +3,9 @@ package rars.venus.editors.rsyntaxtextarea;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.autocomplete.AutoCompletion;
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
-import org.fife.ui.rtextarea.Gutter;
-import org.fife.ui.rtextarea.RTextScrollPane;
-import org.fife.ui.rtextarea.SearchContext;
-import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.*;
 import org.jetbrains.annotations.NotNull;
 import rars.Globals;
 import rars.riscv.lang.lexing.RVTokenType;
@@ -20,10 +15,10 @@ import rars.venus.editors.TextEditingArea;
 import rars.venus.editors.TokenStyle;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Caret;
-import javax.swing.text.Document;
+import javax.swing.plaf.InputMapUIResource;
+import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
@@ -49,7 +44,31 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
     private @NotNull Font currentFont;
 
     public RSyntaxTextAreaBasedEditor(final @NotNull EditorTheme theme) {
-        this.textArea = new RSyntaxTextArea();
+        this.textArea = new RSyntaxTextArea() {
+            @Override
+            protected RTextAreaUI createRTextAreaUI() {
+                // final var ui = super.createRTextAreaUI();
+                return new RSyntaxTextAreaUI(this) {
+                    private final InputMap inputMap = new RSyntaxTextAreaDefaultInputMap() {
+                        {
+                            // removes the RSTACloseMarkupTagAction
+                            remove(KeyStroke.getKeyStroke('/'));
+                            final var defaultMod = RTextArea.getDefaultModifier();
+                            // adds back commenting
+                            put(
+                                KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, defaultMod),
+                                RSyntaxTextAreaEditorKit.rstaToggleCommentAction
+                            );
+                        }
+                    };
+
+                    @Override
+                    protected InputMap getRTextAreaInputMap() {
+                        return inputMap;
+                    }
+                };
+            }
+        };
         this.scrollPane = new RTextScrollPane(textArea);
         this.gutter = scrollPane.getGutter();
         this.currentFont = FONT_SETTINGS.getCurrentFont();
@@ -66,14 +85,14 @@ public final class RSyntaxTextAreaBasedEditor implements TextEditingArea {
             Globals.FP_REGISTER_FILE,
             Globals.CS_REGISTER_FILE
         );
-        
+
         final var autocompletion = new AutoCompletion(provider);
         autocompletion.setShowDescWindow(true);
         autocompletion.setAutoActivationEnabled(true);
         autocompletion.setAutoCompleteSingleChoices(false);
         autocompletion.setAutoActivationDelay(300);
         autocompletion.install(textArea);
-        
+
         // tool tips
         this.textArea.setToolTipSupplier(provider);
         ToolTipManager.sharedInstance().registerComponent(this.textArea);
